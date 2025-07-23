@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attrition Prediction & Action-Simulation Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <h1>Employee Attrition Prediction & Action-Simulation Dashboard</h1>
+            <div class="header-actions">
+                <button class="btn btn--outline btn--sm" id="refreshBtn">
+                    <span>🔄</span> Refresh Predictions
+                </button>
+                <button class="btn btn--outline btn--sm" id="exportBtn">
+                    <span>📊</span> Export Report
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Tab Navigation -->
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="risk-overview">Risk Overview</button>
+                    <button class="tab-btn" data-tab="high-risk">High-Risk Employees</button>
+                    <button class="tab-btn" data-tab="roi-simulation">ROI Simulation</button>
+                    <button class="tab-btn" data-tab="analytics">Analytics & Insights</button>
+                </nav>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Risk Overview Tab -->
+                    <div class="tab-pane active" id="risk-overview">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalEmployees">0</div>
+                                <div class="stat-label">Total Employees</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="highRiskCount">0</div>
+                                <div class="stat-label">High-Risk Employees</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="avgRiskScore">0%</div>
+                                <div class="stat-label">Average Attrition Risk</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="currentAttritionRate">0%</div>
+                                <div class="stat-label">Current Attrition Rate</div>
+                            </div>
+                        </div>
+
+                        <div class="department-breakdown">
+                            <h3>Department Breakdown</h3>
+                            <div class="table-container">
+                                <table class="department-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Department</th>
+                                            <th>Total Employees</th>
+                                            <th>High-Risk Employees</th>
+                                            <th>Avg Risk %</th>
+                                            <th>Avg Salary</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="departmentTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="charts-grid">
+                            <div class="chart-container">
+                                <h4>Risk Distribution by Department</h4>
+                                <canvas id="departmentRiskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- High-Risk Employees Tab -->
+                    <div class="tab-pane" id="high-risk">
+                        <div class="table-controls">
+                            <div class="search-controls">
+                                <input type="text" class="form-control" id="employeeSearch" placeholder="Search employees by name or ID...">
+                                <select class="form-control" id="departmentFilter">
+                                    <option value="">All Departments</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Research & Development">Research & Development</option>
+                                    <option value="Human Resources">Human Resources</option>
+                                </select>
+                                <select class="form-control" id="riskCategoryFilter">
+                                    <option value="">All Risk Categories</option>
+                                    <option value="High">High Risk</option>
+                                    <option value="Medium">Medium Risk</option>
+                                    <option value="Low">Low Risk</option>
+                                </select>
+                                <div class="age-filter">
+                                    <label class="form-label">Age Range: <span id="ageRangeDisplay">20-60</span></label>
+                                    <input type="range" id="ageRangeMin" min="20" max="60" value="20" class="range-input">
+                                    <input type="range" id="ageRangeMax" min="20" max="60" value="60" class="range-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="employee-table" id="employeeTable">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Job Role</th>
+                                        <th>Age</th>
+                                        <th onclick="sortByRisk()" style="cursor: pointer;">Risk % ↕</th>
+                                        <th>Risk Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ROI Simulation Tab -->
+                    <div class="tab-pane" id="roi-simulation">
+                        <div class="simulation-container">
+                            <div class="scenarios-grid">
+                                <div class="scenario-card" data-scenario="0">
+                                    <h5>Salary Increase (10%)</h5>
+                                    <p>Increase salary by 10% for high-risk employees</p>
+                                    <div class="scenario-details">
+                                        <span class="cost">Cost: $6,000/employee</span>
+                                        <span class="reduction">Risk Reduction: 18%</span>
+                                    </div>
+                                    <button class="btn btn--primary scenario-btn" onclick="runScenarioSimulation(0)">Run Simulation</button>
+                                </div>
+                                <div class="scenario-card" data-scenario="1">
+                                    <h5>Work-Life Program</h5>
+                                    <p>Wellness and flex-time initiatives</p>
+                                    <div class="scenario-details">
+                                        <span class="cost">Cost: $2,000/employee</span>
+                                        <span class="reduction">Risk Reduction: 15%</span>
+                                    </div>
+                                    <button class="btn btn--primary scenario-btn" onclick="runScenarioSimulation(1)">Run Simulation</button>
+                                </div>
+                                <div class="scenario-card" data-scenario="2">
+                                    <h5>Professional Development</h5>
+                                    <p>Training and development opportunities</p>
+                                    <div class="scenario-details">
+                                        <span class="cost">Cost: $3,000/employee</span>
+                                        <span class="reduction">Risk Reduction: 17%</span>
+                                    </div>
+                                    <button class="btn btn--primary scenario-btn" onclick="runScenarioSimulation(2)">Run Simulation</button>
+                                </div>
+                                <div class="scenario-card" data-scenario="3">
+                                    <h5>Comprehensive Package</h5>
+                                    <p>Combination of salary, wellness, and training</p>
+                                    <div class="scenario-details">
+                                        <span class="cost">Cost: $8,000/employee</span>
+                                        <span class="reduction">Risk Reduction: 28%</span>
+                                    </div>
+                                    <button class="btn btn--primary scenario-btn" onclick="runScenarioSimulation(3)">Run Simulation</button>
+                                </div>
+                            </div>
+
+                            <div class="simulation-results" id="simulationResults" style="display: none;">
+                                <h3>Simulation Results</h3>
+                                <div class="results-grid">
+                                    <div class="result-card">
+                                        <div class="result-value" id="totalInvestment">$0</div>
+                                        <div class="result-label">Total Investment Cost</div>
+                                    </div>
+                                    <div class="result-card">
+                                        <div class="result-value" id="employeesRetained">0</div>
+                                        <div class="result-label">Expected Employees Retained</div>
+                                    </div>
+                                    <div class="result-card">
+                                        <div class="result-value" id="costSavings">$0</div>
+                                        <div class="result-label">Cost Savings</div>
+                                    </div>
+                                    <div class="result-card">
+                                        <div class="result-value" id="netROI">0%</div>
+                                        <div class="result-label">Net ROI</div>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <h4>ROI Comparison</h4>
+                                    <canvas id="roiComparisonChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics & Insights Tab -->
+                    <div class="tab-pane" id="analytics">
+                        <div class="analytics-grid">
+                            <div class="chart-container">
+                                <h4>Feature Importance</h4>
+                                <canvas id="featureImportanceChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h4>Risk Distribution</h4>
+                                <canvas id="riskDistributionChart"></canvas>
+                            </div>
+                            <div class="chart-container full-width">
+                                <h4>Attrition Risk Over Time</h4>
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="insights-section">
+                            <h3>Key Insights & Recommendations</h3>
+                            <div class="insights-grid">
+                                <div class="insight-card">
+                                    <h4>🔥 Critical Risk Factors</h4>
+                                    <p>Overtime work is the strongest predictor of attrition, affecting 24% of risk assessment. Implement flexible work arrangements to reduce overtime dependency.</p>
+                                </div>
+                                <div class="insight-card">
+                                    <h4>💰 Compensation Impact</h4>
+                                    <p>Monthly income accounts for 18% of attrition risk. Consider targeted salary adjustments for high-performing employees in at-risk categories.</p>
+                                </div>
+                                <div class="insight-card">
+                                    <h4>📍 Location Matters</h4>
+                                    <p>Distance from home is a significant factor (12% importance). Remote work options could substantially reduce attrition risk.</p>
+                                </div>
+                                <div class="insight-card">
+                                    <h4>📚 Development Opportunity</h4>
+                                    <p>Job satisfaction and work-life balance together account for 19% of risk. Invest in employee wellness and career development programs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
